@@ -3,7 +3,6 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
-import pylab
 from Bio import SeqIO
 
 
@@ -15,8 +14,7 @@ def fasta_reader(fasta):
 	flist = SeqIO.parse(fasta, "fasta")
 	for i in flist:
 		yield i.description, i.seq
-matches = ["N","*","Y","M","m","n","R","S"] 
-nucleotides=["A","T","G","C"]
+nucleotides=["A","T","G","C","a","t","g","c"]
 
 def get_kmer_frequencies(sequence, k):
     """
@@ -33,8 +31,7 @@ def get_kmer_frequencies(sequence, k):
             freq[kmer] = 0
         freq[kmer] += 1
     for key in list(freq):
-        if any(x in key for x in matches):
-        #if not any(x in key for x in matches):
+        if not all(x in nucleotides for x in key):
             del freq[key]
     return freq
 
@@ -139,16 +136,17 @@ if __name__ == "__main__":
         print(chaos_k4.shape)
         flattened_arr= chaos_k4.flatten()
         print(flattened_arr)
+        #
         np.savetxt(original_file_name+"_FCGR" + str(k) + "-mers_preprocessed.txt",  flattened_arr, newline=",", fmt="%.16f")
         if args.generate_plot:
-            pylab.title("Frequency chaos game representation for " + str(k) + "-mers")
+            plt.title("Frequency chaos game representation for " + str(k) + "-mers")
             # Add letters outside each corner of the plot
-            pylab.text(-0.1, -0.1, "A", ha="right", va="top", transform=pylab.gca().transAxes, fontsize=14)
-            pylab.text(1.1, -0.1, "C", ha="left", va="top", transform=pylab.gca().transAxes, fontsize=14)
-            pylab.text(-0.1, 1.1, "T", ha="right", va="bottom", transform=pylab.gca().transAxes, fontsize=14)
-            pylab.text(1.1, 1.1, "G", ha="left", va="bottom", transform=pylab.gca().transAxes, fontsize=14)
-            pylab.imshow(chaos_k4, interpolation="nearest", cmap=cm.gray_r, origin="lower")
-            pylab.savefig(original_file_name+str(-k)+"-mers.png",bbox_inches="tight", pad_inches=0)
+            plt.text(-0.1, -0.1, "A", ha="right", va="top", transform=plt.gca().transAxes, fontsize=14)
+            plt.text(1.1, -0.1, "C", ha="left", va="top", transform=plt.gca().transAxes, fontsize=14)
+            plt.text(-0.1, 1.1, "T", ha="right", va="bottom", transform=plt.gca().transAxes, fontsize=14)
+            plt.text(1.1, 1.1, "G", ha="left", va="bottom", transform=plt.gca().transAxes, fontsize=14)
+            plt.imshow(chaos_k4, interpolation="nearest", cmap=cm.gray_r, origin="lower")
+            plt.savefig(original_file_name+str(-k)+"-mers.png",bbox_inches="tight", pad_inches=0)
             fig = plt.figure(figsize=(chaos_k4.shape[1], chaos_k4.shape[0]), dpi=user_res)
             ax = plt.Axes(fig, [0., 0., 1., 1.], )
             ax.set_axis_off()
